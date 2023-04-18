@@ -5,3 +5,15 @@ target/
 .bsp/
 metals.sbt
 
+/deploy/bin/
+/deploy/data/
+/deploy/lib/
+/deploy/examples/
+/deploy/system/
+/deploy/LICENSE
+
+deploy/deploy/README
+deploy/BUILDING.md
+deploy/NOTICE
+deploy/README.md
+deploy/RELEASE-NOTES.md
