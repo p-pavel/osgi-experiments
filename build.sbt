@@ -7,7 +7,12 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 lazy val scalaLibs =
   project.in(file("scala-libs"))
 
-lazy val root =
-  project.in(file("."))
-  .aggregate(scalaLibs)
+lazy val useLibs =
+  project
+    .in(file("use-libs"))
+    .dependsOn(scalaLibs)
 
+lazy val root =
+  project
+    .in(file("."))
+    .aggregate(scalaLibs, useLibs)
