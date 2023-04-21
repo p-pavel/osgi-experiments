@@ -27,11 +27,8 @@ lazy val scalaLibs =
       ),
       OsgiKeys.exportPackage := 
         Seq(
-          "scala;-split-package:=merge-first",
-          "scala.quoted",
-          "scala.quoted.runtime",
-          "scala.deriving",
-          "scala.runtime;-split-package:=merge-first",
+          "scala.*;-split-package:=merge-first",
+          // "scala.quoted.*;-split-package:=merge-first",
           //  "scala.*",
           // "scala.runtime.*",
           // "scala.annotation.*",
