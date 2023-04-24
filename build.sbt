@@ -40,6 +40,22 @@ inThisBuild {
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
+lazy val scala3LibExploded = 
+  project.in(file("libs/scala3LibExploded"))
+  .enablePlugins(SbtOsgi)
+  .settings(
+    osgiSettings,
+    autoScalaLibrary := false,
+    libraryDependencies := Seq(
+      "org.scala-lang" % "scala-library" % "2.13.10",
+      "org.scala-lang" % "scala3-library_3" % "3.2.2",
+      ),
+    OsgiKeys.explodedJars := (Compile / dependencyClasspathAsJars).value.map(_.data),
+    OsgiKeys.exportPackage := Seq(
+      "*;version=3.2.2"
+    ),
+  )
+
 lazy val scala3Lib =
   (project in file("libs/scala3Lib"))
     .enablePlugins(SbtOsgi)
@@ -111,12 +127,67 @@ lazy val catsEffect =
       ),
       OsgiKeys.importPackage := Seq(
         "scala;scala.**;version=\"[3.2,4)\"",
-        "cats;cats.kernel;cats.syntax;cats.data;cats.arrow;version=\"[2.9,3)\"",
-        ),
-      libraryDependencies := Seq(
+        "cats;cats.kernel;cats.syntax;cats.data;cats.arrow;version=\"[2.9,3)\""
+      ),
+      libraryDependencies    := Seq(
         "org.typelevel" %% "cats-effect" % "3.4.9"
       )
     )
 
+lazy val fs2 =
+  project
+    .in(file("libs/fs2"))
+    .enablePlugins(SbtOsgi)
+    .settings(
+      osgiLibSettings,
+      OsgiKeys.embeddedJars := (Compile / externalDependencyClasspath).value
+        .map(
+          _.data
+        )
+        .filter(_.getName.contains("fs2")), // TODO: hack
+      OsgiKeys.exportPackage := Seq(
+        "fs2;fs2.**;version=3.6.1"
+      ),
+      OsgiKeys.importPackage := Seq(
+        "scala;scala.**;version=\"[3.2,4)\"",
+        "cats;cats.kernel;cats.syntax;cats.data;cats.arrow;version=\"[2.9,3)\"",
+        "cats.effect;cats.effect.**;version=\"[3.4,4)\"",
+        "*"
+      ),
+      libraryDependencies    := Seq(
+        "co.fs2" %% "fs2-core" % "3.6.1",
+        "co.fs2" %% "fs2-io"   % "3.6.1"
+      )
+    )
+
+lazy val ip4s = 
+  project
+    .in(file("libs/ip4s"))
+    .enablePlugins(SbtOsgi)
+    .settings(
+      osgiLibSettings,
+      OsgiKeys.embeddedJars := (Compile / externalDependencyClasspath).value
+        .map(
+          _.data
+        )
+        .filter(_.getName.contains("ip4s")), // TODO: hack
+      OsgiKeys.exportPackage := Seq(
+        "org.typelevel.ip4s;org.typelevel.ip4s.**;version=3.0.0"
+      ),
+      OsgiKeys.importPackage := Seq(
+        "scala;scala.**;version=\"[3.2,4)\"",
+        "cats;cats.kernel;cats.syntax;cats.data;cats.arrow;version=\"[2.9,3)\"",
+        "cats.effect;cats.effect.**;version=\"[3.4,4)\"",
+        "fs2;fs2.**;version=\"[3.6,4)\"",
+        "*"
+      ),
+      libraryDependencies    := Seq(
+        "org.typelevel" %% "ip4s-core" % "3.0.0",
+        "org.typelevel" %% "ip4s-circe" % "3.0.0"
+      )
+    )
+
 lazy val root =
-  project.in(file(".")).aggregate(cats, scala3Lib, catsEffect)
+  project
+    .in(file("."))
+    .aggregate(cats, scala3Lib, catsEffect, fs2)
