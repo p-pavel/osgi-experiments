@@ -46,12 +46,12 @@ lazy val scala3Lib =
     .settings(
       osgiLibSettings,
       libraryDependencies    := Seq(
-        "org.scala-lang" %% "scala3-library" % "3.2.2",
-        "org.scala-lang"  % "scala-library"  % "2.13.7"
+        "org.scala-lang" %% "scala3-library" % "3.2.2"
       ),
       OsgiKeys.exportPackage := Seq(
         "scala;scala.**;-split-package:=merge-first; version=3.2.2"
-      )
+      ),
+      OsgiKeys.importPackage := Seq("*") // TODO: check self imports
     )
 
 lazy val cats =
@@ -88,8 +88,35 @@ lazy val cats =
         "scala.util",
         "scala.util.control",
         "scala.util.hashing"
-      ).map(_ + ";version=\"[3.2,4)\""),
+      ).map(_ + ";version=\"[3.2,4)\"") ++ Seq("*"),
       libraryDependencies    := Seq(
         "org.typelevel" %% "cats-core" % "2.9.0"
       )
     )
+
+lazy val catsEffect =
+  project
+    .in(file("libs/cats-effect"))
+    .enablePlugins(SbtOsgi)
+    .dependsOn(cats, scala3Lib)
+    .settings(
+      osgiLibSettings,
+      OsgiKeys.embeddedJars := (Compile / externalDependencyClasspath).value
+        .map(
+          _.data
+        )
+        .filter(_.getName.contains("cats-effect")), // TODO: hack
+      OsgiKeys.exportPackage := Seq(
+        "cats.effect;cats.effect.**;version=3.4.9"
+      ),
+      OsgiKeys.importPackage := Seq(
+        "scala;scala.**;version=\"[3.2,4)\"",
+        "cats;cats.kernel;cats.syntax;cats.data;cats.arrow;version=\"[2.9,3)\"",
+        ),
+      libraryDependencies := Seq(
+        "org.typelevel" %% "cats-effect" % "3.4.9"
+      )
+    )
+
+lazy val root =
+  project.in(file(".")).aggregate(cats, scala3Lib, catsEffect)
