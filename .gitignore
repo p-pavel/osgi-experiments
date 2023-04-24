@@ -6,3 +6,4 @@ target/
 .scala-build/
 metals.sbt
 deploy/
+.DS_Store
