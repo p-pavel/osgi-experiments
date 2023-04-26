@@ -86,7 +86,7 @@ lazy val catsEffect =
       OsgiKeys.exportPackage := Seq("cats.effect;cats.effect.**;version=3.4.9")
     )
 
-lazy val scodec = 
+lazy val scodec    =
   project
     .in(file("libs/scodec"))
     .enablePlugins(SbtOsgi)
@@ -101,26 +101,26 @@ lazy val scodec =
       ),
       libraryDependencies    := Seq(
         "org.scodec" %% "scodec-bits" % "1.1.37"
-      ),
+      )
     )
-lazy val literally = 
+lazy val literally =
   project
-  .in(file("libs/literally"))
-  .enablePlugins(SbtOsgi)
-  .dependsOn(scala3Lib)
-  .settings(
-    deployOsgiSettings,
-    OsgiKeys.explodedJars  := (Compile / dependencyClasspathAsJars).value
-      .map(_.data)
-      .filter(_.getName().contains("literally")),
-    OsgiKeys.exportPackage := Seq(
-      "org.typelevel.literally;version=1.1.0"
-    ),
-    libraryDependencies    := Seq(
-      "org.typelevel" %% "literally" % "1.1.0"
-    ),
-  )
-lazy val ip4s = 
+    .in(file("libs/literally"))
+    .enablePlugins(SbtOsgi)
+    .dependsOn(scala3Lib)
+    .settings(
+      deployOsgiSettings,
+      OsgiKeys.explodedJars  := (Compile / dependencyClasspathAsJars).value
+        .map(_.data)
+        .filter(_.getName().contains("literally")),
+      OsgiKeys.exportPackage := Seq(
+        "org.typelevel.literally;version=1.1.0"
+      ),
+      libraryDependencies    := Seq(
+        "org.typelevel" %% "literally" % "1.1.0"
+      )
+    )
+lazy val ip4s      =
   project
     .in(file("libs/ip4s"))
     .enablePlugins(SbtOsgi)
@@ -134,10 +134,10 @@ lazy val ip4s =
         "com.comcast.ip4s;version=3.3.0"
       ),
       libraryDependencies    := Seq(
-        "com.comcast" %% "ip4s-core" % "3.3.0" notTransitive()
-      ),
+        "com.comcast" %% "ip4s-core" % "3.3.0" notTransitive ()
+      )
     )
-lazy val fs2 =
+lazy val fs2       =
   project
     .in(file("libs/fs2"))
     .enablePlugins(SbtOsgi)
@@ -152,37 +152,141 @@ lazy val fs2 =
         "*"
       ),
       libraryDependencies    := Seq(
-        "co.fs2" %% "fs2-core" % "3.6.1" notTransitive(),
-        "co.fs2" %% "fs2-io"   % "3.6.1" notTransitive(),
+        "co.fs2" %% "fs2-core" % "3.6.1" notTransitive (),
+        "co.fs2" %% "fs2-io"   % "3.6.1" notTransitive ()
       )
     )
 
-// lazy val ip4s =
-//   project
-//     .in(file("libs/ip4s"))
-//     .enablePlugins(SbtOsgi)
-//     .settings(
-//       osgiLibSettings,
-//       OsgiKeys.embeddedJars := (Compile / externalDependencyClasspath).value
-//         .map(
-//           _.data
-//         )
-//         .filter(_.getName.contains("ip4s")), // TODO: hack
-//       OsgiKeys.exportPackage := Seq(
-//         "org.typelevel.ip4s;org.typelevel.ip4s.**;version=3.0.0"
-//       ),
-//       OsgiKeys.importPackage := Seq(
-//         "scala;scala.**;version=\"[3.2,4)\"",
-//         "cats;cats.kernel;cats.syntax;cats.data;cats.arrow;version=\"[2.9,3)\"",
-//         "cats.effect;cats.effect.**;version=\"[3.4,4)\"",
-//         "fs2;fs2.**;version=\"[3.6,4)\"",
-//         "*"
-//       ),
-//       libraryDependencies    := Seq(
-//         "org.typelevel" %% "ip4s-core"  % "3.0.0",
-//         "org.typelevel" %% "ip4s-circe" % "3.0.0"
-//       )
-//     )
+lazy val catsParse =
+  project
+    .in(file("libs/cats-parse"))
+    .enablePlugins(SbtOsgi)
+    .dependsOn(scala3Lib, cats, catsEffect, scodec, ip4s)
+    .settings(
+      deployOsgiSettings,
+      libraryDependencies    := Seq(
+        "org.typelevel" %% "cats-parse" % "0.3.9" notTransitive ()
+      ),
+      OsgiKeys.explodedJars  := (Compile / dependencyClasspathAsJars).value
+        .map(_.data)
+        .filter(_.getName().contains("cats-parse")),
+      OsgiKeys.exportPackage := Seq(
+        "cats.parse;cats.parse.**;version=0.3.9"
+      )
+    )
+
+lazy val keypool =
+  project
+    .in(file("libs/keypool"))
+    .enablePlugins(SbtOsgi)
+    .dependsOn(scala3Lib, cats, catsEffect)
+    .settings(
+      deployOsgiSettings,
+      OsgiKeys.explodedJars  := (Compile / dependencyClasspathAsJars).value
+        .map(_.data)
+        .filter(_.getName().contains("keypool")),
+      OsgiKeys.exportPackage := Seq(
+        "org.typelevel.keypool;version=0.4.8"
+      ),
+      libraryDependencies    := Seq(
+        "org.typelevel" %% "keypool" % "0.4.8" notTransitive ()
+      )
+    )
+
+lazy val log4cats =
+  project
+    .in(file("libs/log4cats"))
+    .enablePlugins(SbtOsgi)
+    .dependsOn(scala3Lib, cats, catsEffect)
+    .settings(
+      deployOsgiSettings,
+      OsgiKeys.explodedJars  := (Compile / dependencyClasspathAsJars).value
+        .map(_.data)
+        .filter(_.getName().contains("log4cats")),
+      OsgiKeys.exportPackage := Seq(
+        "org.typelevel.log4cats;org.typelevel.log4cats.slf4j;org.typelevel.log4cats.extras;org.typelevel.log4cats.syntax;version=2.6.0"
+      ),
+      libraryDependencies    := Seq(
+        "org.typelevel" %% "log4cats-slf4j" % "2.6.0"
+      )
+    )
+
+lazy val vault = 
+  project
+    .in(file("libs/vault"))
+    .enablePlugins(SbtOsgi)
+    .dependsOn(scala3Lib, cats, catsEffect)
+    .settings(
+      deployOsgiSettings,
+      OsgiKeys.explodedJars  := (Compile / dependencyClasspathAsJars).value
+        .map(_.data)
+        .filter(_.getName().contains("vault")),
+      OsgiKeys.exportPackage := Seq(
+        "org.typelevel.vault;version=3.5.0"
+      ),
+      libraryDependencies    := Seq(
+        "org.typelevel" %% "vault" % "3.5.0" notTransitive ()
+      )
+    )
+
+lazy val caseInsensitive = 
+  project
+    .in(file("libs/case-insensitive"))
+    .enablePlugins(SbtOsgi)
+    .dependsOn(scala3Lib,cats)
+    .settings(
+      deployOsgiSettings,
+      OsgiKeys.explodedJars  := (Compile / dependencyClasspathAsJars).value
+        .map(_.data)
+        .filter(_.getName().contains("ci")),
+      OsgiKeys.exportPackage := Seq(
+        "org.typelevel.ci;version=1.3.0"
+      ),
+      libraryDependencies    := Seq(
+        "org.typelevel" %% "case-insensitive" % "1.3.0" notTransitive ()
+      )
+    )
+
+lazy val http4s =
+  project
+    .in(file("libs/http4s"))
+    .dependsOn(
+      scala3Lib,
+      cats,
+      catsEffect,
+      fs2,
+      scodec,
+      ip4s,
+      catsParse,
+      keypool,
+      log4cats,
+      vault,
+      caseInsensitive
+    )
+    .enablePlugins(SbtOsgi)
+    .settings(
+      deployOsgiSettings,
+      OsgiKeys.exportPackage              := Seq(
+        "org.http4s;org.http4s.**;version=0.23.18"
+      ),
+      OsgiKeys.explodedJars               := (Compile / dependencyClasspathAsJars).value
+        .map(_.data)
+        .filter { j =>
+          val n = j.getName(); n.contains("http4s-") || n.contains("hpack")
+        },
+      libraryDependencies                 := Seq(
+        "http4s-core",
+        "http4s-dsl",
+        "http4s-server",
+        "http4s-client",
+        "http4s-ember-core",
+        "http4s-ember-server",
+        "http4s-ember-client",
+
+      ).map("org.http4s" %% _ % "0.23.18" notTransitive()),
+      libraryDependencies += "org.http4s" %% "http4s-crypto" % "0.2.4" notTransitive(),
+      libraryDependencies += "com.twitter" % "hpack" % "1.0.2" notTransitive()
+    )
 
 lazy val spike =
   project
@@ -219,4 +323,18 @@ lazy val root  =
         dest
       }
     )
-    .aggregate(cats, scala3Lib, catsEffect, scodec, fs2, ip4s, literally)
+    .aggregate(
+      cats,
+      scala3Lib,
+      catsEffect,
+      scodec,
+      fs2,
+      ip4s,
+      literally,
+      http4s,
+      catsParse,
+      keypool,
+      log4cats,
+      vault,
+      caseInsensitive
+    )
