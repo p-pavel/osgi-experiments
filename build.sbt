@@ -1,9 +1,18 @@
-lazy val osgiLibraryBundle = taskKey[File](
+lazy val osgiLibraryBundle  = taskKey[File](
   "Create a library OSGi bundle (it does not have a classpath, only includes jars)"
 )
-lazy val karafDirectory    = settingKey[File]("Karaf directory")
-lazy val deployToKaraf     = taskKey[File]("Deploy to karaf")
+lazy val karafDirectory     = settingKey[File]("Karaf directory")
+lazy val deployToKaraf      = taskKey[File]("Deploy to karaf")
 enablePlugins(SbtOsgi)
+lazy val deployOsgiSettings = osgiSettings ++ Seq(
+  deployToKaraf     := {
+    val bundle = OsgiKeys.bundle.value
+    val karaf  = karafDirectory.value
+    IO.copyFile(bundle, karaf / bundle.getName)
+    karaf / bundle.getName
+  },
+  publishMavenStyle := false
+)
 
 inThisBuild {
   Seq(
@@ -23,7 +32,7 @@ lazy val scala3Lib =
     .in(file("libs/scala3Lib"))
     .enablePlugins(SbtOsgi)
     .settings(
-      autoScalaLibrary       := false,
+      deployOsgiSettings,
       libraryDependencies    := Seq(
         "org.scala-lang" % "scala-library"    % "2.13.10",
         "org.scala-lang" % "scala3-library_3" % "3.2.2"
@@ -36,23 +45,22 @@ lazy val scala3Lib =
       OsgiKeys.importPackage := Seq("*")
     )
 
-lazy val cats      =
+lazy val cats =
   project
     .in(file("libs/cats"))
     .dependsOn(scala3Lib)
     .enablePlugins(SbtOsgi)
     .settings(
-      osgiSettings,
-      autoScalaLibrary       := false,
+      deployOsgiSettings,
       OsgiKeys.explodedJars  := (Compile / dependencyClasspathAsJars).value
         .map(_.data)
         .filter(_.getName().contains("cats-")),
       OsgiKeys.exportPackage := Seq(
         "cats;cats.**;version=2.9.0"
       ),
-        
       libraryDependencies    := Seq(
-        "org.typelevel" %% "cats-core" % "2.9.0"
+        "org.typelevel" %% "cats-core"   % "2.9.0" notTransitive (),
+        "org.typelevel" %% "cats-kernel" % "2.9.0" notTransitive ()
       )
     )
 
@@ -60,12 +68,22 @@ lazy val catsEffect =
   project
     .in(file("libs/cats-effect"))
     .enablePlugins(SbtOsgi)
-    .dependsOn(cats, scala3Lib)
+    .dependsOn(scala3Lib)
     .settings(
-      osgiSettings,
+      deployOsgiSettings,
       libraryDependencies    := Seq(
-        "org.typelevel" %% "cats-effect" % "3.4.9"
-      )
+        "org.typelevel" %% "cats-effect"        % "3.4.9",
+        "org.typelevel" %% "cats-effect-kernel" % "3.4.9",
+        "org.typelevel" %% "cats-effect-std"    % "3.4.9"
+      ),
+      OsgiKeys.explodedJars  := (Compile / dependencyClasspathAsJars).value
+        .map(_.data)
+        .filter(_.getName().contains("cats-effect-")),
+      OsgiKeys.importPackage := Seq(
+        "cats;cats.kernel;cats.syntax;cats.arrow;cats.data;version=\"[2.9,3)\"",
+        "*"
+      ), // TODO: Why?!!
+      OsgiKeys.exportPackage := Seq("cats.effect;cats.effect.**;version=3.4.9")
     )
 
 // lazy val fs2 =
@@ -156,4 +174,4 @@ lazy val root  =
         dest
       }
     )
-    .aggregate(cats, scala3Lib, catsEffect )
+    .aggregate(cats, scala3Lib, catsEffect)
