@@ -86,31 +86,42 @@ lazy val catsEffect =
       OsgiKeys.exportPackage := Seq("cats.effect;cats.effect.**;version=3.4.9")
     )
 
-// lazy val fs2 =
-//   project
-//     .in(file("libs/fs2"))
-//     .enablePlugins(SbtOsgi)
-//     .settings(
-//       osgiLibSettings,
-//       OsgiKeys.embeddedJars := (Compile / externalDependencyClasspath).value
-//         .map(
-//           _.data
-//         )
-//         .filter(_.getName.contains("fs2")), // TODO: hack
-//       OsgiKeys.exportPackage := Seq(
-//         "fs2;fs2.**;version=3.6.1"
-//       ),
-//       OsgiKeys.importPackage := Seq(
-//         "scala;scala.**;version=\"[3.2,4)\"",
-//         "cats;cats.kernel;cats.syntax;cats.data;cats.arrow;version=\"[2.9,3)\"",
-//         "cats.effect;cats.effect.**;version=\"[3.4,4)\"",
-//         "*"
-//       ),
-//       libraryDependencies    := Seq(
-//         "co.fs2" %% "fs2-core" % "3.6.1",
-//         "co.fs2" %% "fs2-io"   % "3.6.1"
-//       )
-//     )
+lazy val scodec = 
+  project
+    .in(file("libs/scodec"))
+    .enablePlugins(SbtOsgi)
+    .dependsOn(scala3Lib)
+    .settings(
+      deployOsgiSettings,
+      OsgiKeys.explodedJars  := (Compile / dependencyClasspathAsJars).value
+        .map(_.data)
+        .filter(_.getName().contains("scodec-")),
+      OsgiKeys.exportPackage := Seq(
+        "scodec.bits;version=1.1.37"
+      ),
+      libraryDependencies    := Seq(
+        "org.scodec" %% "scodec-bits" % "1.1.37"
+      ),
+    )
+lazy val fs2 =
+  project
+    .in(file("libs/fs2"))
+    .enablePlugins(SbtOsgi)
+    .dependsOn(scala3Lib, cats, catsEffect, scodec)
+    .settings(
+      deployOsgiSettings,
+      OsgiKeys.exportPackage := Seq(
+        "fs2;fs2.**;version=3.6.1"
+      ),
+      OsgiKeys.importPackage := Seq(
+        "jnr.unixsocket;resolution:=optional",
+        "*"
+      ),
+      libraryDependencies    := Seq(
+        "co.fs2" %% "fs2-core" % "3.6.1" notTransitive(),
+        "co.fs2" %% "fs2-io"   % "3.6.1" notTransitive(),
+      )
+    )
 
 // lazy val ip4s =
 //   project
@@ -174,4 +185,4 @@ lazy val root  =
         dest
       }
     )
-    .aggregate(cats, scala3Lib, catsEffect)
+    .aggregate(cats, scala3Lib, catsEffect, scodec, fs2)
