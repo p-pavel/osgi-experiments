@@ -103,12 +103,28 @@ lazy val scodec =
         "org.scodec" %% "scodec-bits" % "1.1.37"
       ),
     )
-
+lazy val literally = 
+  project
+  .in(file("libs/literally"))
+  .enablePlugins(SbtOsgi)
+  .dependsOn(scala3Lib)
+  .settings(
+    deployOsgiSettings,
+    OsgiKeys.explodedJars  := (Compile / dependencyClasspathAsJars).value
+      .map(_.data)
+      .filter(_.getName().contains("literally")),
+    OsgiKeys.exportPackage := Seq(
+      "org.typelevel.literally;version=1.1.0"
+    ),
+    libraryDependencies    := Seq(
+      "org.typelevel" %% "literally" % "1.1.0"
+    ),
+  )
 lazy val ip4s = 
   project
     .in(file("libs/ip4s"))
     .enablePlugins(SbtOsgi)
-    .dependsOn(scala3Lib, catsEffect, cats)
+    .dependsOn(scala3Lib, catsEffect, cats, literally)
     .settings(
       deployOsgiSettings,
       OsgiKeys.explodedJars  := (Compile / dependencyClasspathAsJars).value
@@ -203,4 +219,4 @@ lazy val root  =
         dest
       }
     )
-    .aggregate(cats, scala3Lib, catsEffect, scodec, fs2, ip4s)
+    .aggregate(cats, scala3Lib, catsEffect, scodec, fs2, ip4s, literally)
