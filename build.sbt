@@ -290,16 +290,16 @@ lazy val http4s =
 
 lazy val spike =
   project
-    .dependsOn(scala3Lib)
+    .dependsOn(scala3Lib, http4s)
     .enablePlugins(SbtOsgi)
     .settings(
-      osgiSettings,
+      deployOsgiSettings,
       OsgiKeys.bundleSymbolicName     := "com.perikov.osgi.spike",
       OsgiKeys.bundleVersion          := version.value,
       OsgiKeys.failOnUndecidedPackage := true,
       OsgiKeys.additionalHeaders      := Map(
         "Bundle-Description" -> "Just some tests to check bundle generation",
-        "Bundle-Name"        -> "Perikv :: OSGi :: Spikes :: spike1"
+        "Bundle-Name"        -> "Perikov :: OSGi :: Spikes :: spike1"
       ),
       // OsgiKeys.importPackage          := Seq("com.perikov.osgi.spike", "*"),
       OsgiKeys.exportPackage          := Seq("com.perikov.osgi.spike;version=1.0.0"),
