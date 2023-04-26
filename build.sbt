@@ -103,11 +103,29 @@ lazy val scodec =
         "org.scodec" %% "scodec-bits" % "1.1.37"
       ),
     )
+
+lazy val ip4s = 
+  project
+    .in(file("libs/ip4s"))
+    .enablePlugins(SbtOsgi)
+    .dependsOn(scala3Lib, catsEffect, cats)
+    .settings(
+      deployOsgiSettings,
+      OsgiKeys.explodedJars  := (Compile / dependencyClasspathAsJars).value
+        .map(_.data)
+        .filter(_.getName().contains("ip4s-")),
+      OsgiKeys.exportPackage := Seq(
+        "com.comcast.ip4s;version=3.3.0"
+      ),
+      libraryDependencies    := Seq(
+        "com.comcast" %% "ip4s-core" % "3.3.0" notTransitive()
+      ),
+    )
 lazy val fs2 =
   project
     .in(file("libs/fs2"))
     .enablePlugins(SbtOsgi)
-    .dependsOn(scala3Lib, cats, catsEffect, scodec)
+    .dependsOn(scala3Lib, cats, catsEffect, scodec, ip4s)
     .settings(
       deployOsgiSettings,
       OsgiKeys.exportPackage := Seq(
@@ -185,4 +203,4 @@ lazy val root  =
         dest
       }
     )
-    .aggregate(cats, scala3Lib, catsEffect, scodec, fs2)
+    .aggregate(cats, scala3Lib, catsEffect, scodec, fs2, ip4s)
