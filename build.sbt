@@ -1,6 +1,8 @@
 lazy val osgiLibraryBundle = taskKey[File](
   "Create a library OSGi bundle (it does not have a classpath, only includes jars)"
 )
+lazy val karafDirectory    = settingKey[File]("Karaf directory")
+lazy val deployToKaraf     = taskKey[File]("Deploy to karaf")
 enablePlugins(SbtOsgi)
 
 lazy val osgiLibSettings =
@@ -34,27 +36,30 @@ inThisBuild {
     version          := "0.1.0-SNAPSHOT",
     organization     := "com.perikov",
     autoScalaLibrary := false,
-    scalacOptions ++= Seq("-deprecation")
+    scalacOptions ++= Seq("-deprecation"),
+    karafDirectory   := baseDirectory.value / ".." / "deploy" / "deploy"
   )
 }
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
-lazy val scala3LibExploded = 
-  project.in(file("libs/scala3LibExploded"))
-  .enablePlugins(SbtOsgi)
-  .settings(
-    osgiSettings,
-    autoScalaLibrary := false,
-    libraryDependencies := Seq(
-      "org.scala-lang" % "scala-library" % "2.13.10",
-      "org.scala-lang" % "scala3-library_3" % "3.2.2",
+lazy val scala3LibExploded =
+  project
+    .in(file("libs/scala3LibExploded"))
+    .enablePlugins(SbtOsgi)
+    .settings(
+      autoScalaLibrary       := false,
+      libraryDependencies    := Seq(
+        "org.scala-lang" % "scala-library"    % "2.13.10",
+        "org.scala-lang" % "scala3-library_3" % "3.2.2"
       ),
-    OsgiKeys.explodedJars := (Compile / dependencyClasspathAsJars).value.map(_.data),
-    OsgiKeys.exportPackage := Seq(
-      "*;version=3.2.2"
-    ),
-  )
+      OsgiKeys.explodedJars  := (Compile / dependencyClasspathAsJars).value
+        .map(_.data),
+      OsgiKeys.exportPackage := Seq(
+        "*;version=3.2.2"
+      ),
+      OsgiKeys.importPackage := Seq("*")
+    )
 
 lazy val scala3Lib =
   (project in file("libs/scala3Lib"))
@@ -69,42 +74,21 @@ lazy val scala3Lib =
       ),
       OsgiKeys.importPackage := Seq("*") // TODO: check self imports
     )
-
-lazy val cats =
+lazy val cats      =
   project
     .in(file("libs/cats"))
-    .dependsOn(scala3Lib)
+    .dependsOn(scala3LibExploded)
     .enablePlugins(SbtOsgi)
     .settings(
-      osgiLibSettings,
-      autoScalaLibrary      := false,
-      OsgiKeys.embeddedJars := (Compile / externalDependencyClasspath).value
-        .map(
-          _.data
-        )
-        .filterNot(_.getName.contains("library")), // TODO: hack
+      osgiSettings,
+      autoScalaLibrary       := false,
+      OsgiKeys.explodedJars  := (Compile / dependencyClasspathAsJars).value
+        .map(_.data)
+        .filterNot(_.getName().contains("scala3lib"))
+        .filterNot(_.getName().contains("library")),
       OsgiKeys.exportPackage := Seq(
         "cats;cats.**;version=2.9.0"
       ),
-      OsgiKeys.importPackage := Seq(
-        "scala",
-        "scala.annotation",
-        "scala.collection",
-        "scala.collection.immutable",
-        "scala.collection.mutable",
-        "scala.concurrent",
-        "scala.concurrent.duration",
-        "scala.deriving",
-        "scala.math",
-        "scala.reflect",
-        "scala.runtime",
-        "scala.runtime.function",
-        "scala.runtime.java8",
-        "scala.sys",
-        "scala.util",
-        "scala.util.control",
-        "scala.util.hashing"
-      ).map(_ + ";version=\"[3.2,4)\"") ++ Seq("*"),
       libraryDependencies    := Seq(
         "org.typelevel" %% "cats-core" % "2.9.0"
       )
@@ -160,7 +144,7 @@ lazy val fs2 =
       )
     )
 
-lazy val ip4s = 
+lazy val ip4s =
   project
     .in(file("libs/ip4s"))
     .enablePlugins(SbtOsgi)
@@ -182,12 +166,44 @@ lazy val ip4s =
         "*"
       ),
       libraryDependencies    := Seq(
-        "org.typelevel" %% "ip4s-core" % "3.0.0",
+        "org.typelevel" %% "ip4s-core"  % "3.0.0",
         "org.typelevel" %% "ip4s-circe" % "3.0.0"
       )
     )
 
-lazy val root =
+lazy val spike =
+  project
+    .dependsOn(scala3LibExploded)
+    .enablePlugins(SbtOsgi)
+    .settings(
+      osgiSettings,
+      OsgiKeys.bundleSymbolicName     := "com.perikov.osgi.spike",
+      OsgiKeys.bundleVersion          := version.value,
+      OsgiKeys.failOnUndecidedPackage := true,
+      OsgiKeys.additionalHeaders      := Map(
+        "Bundle-Description" -> "Just some tests to check bundle generation",
+        "Bundle-Name"        -> "Perikv :: OSGi :: Spikes :: spike1"
+      ),
+      // OsgiKeys.importPackage          := Seq("com.perikov.osgi.spike", "*"),
+      OsgiKeys.exportPackage          := Seq("com.perikov.osgi.spike;version=1.0.0"),
+      libraryDependencies ++=
+        Seq(
+          "org.osgi" % "org.osgi.core" % "6.0.0",
+          "org.osgi" % "osgi.cmpn"     % "7.0.0"
+        )
+    )
+lazy val root  =
   project
     .in(file("."))
-    .aggregate(cats, scala3Lib, catsEffect, fs2)
+    .enablePlugins(SbtOsgi)
+    .settings(
+      osgiSettings,
+      deployToKaraf := {
+        val karafDir = karafDirectory.value
+        val bundle   = OsgiKeys.bundle.value
+        val dest     = karafDir / bundle.getName
+        IO.copyFile(bundle, dest)
+        dest
+      }
+    )
+    .aggregate(cats, scala3Lib, catsEffect, fs2, spike)
