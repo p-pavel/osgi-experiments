@@ -239,7 +239,7 @@ object features:
   )
 
   def cats =
-    feature("cats", "2.9.0", "Cats", b.cats, stdLib)
+    feature("cats", "2.9.0", "Cats", b.cats, deps = stdLib)
 
   def catsEffect =
     feature("cats-effect", "3.4.10", "Cats Effect", b.catsEffect, cats)
