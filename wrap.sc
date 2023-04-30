@@ -169,9 +169,14 @@ object bundles:
       "http4s-ember-core"   -> "Http4s :: Ember :: Core",
       "http4s-ember-server" -> "Http4s :: Ember :: Server",
       "http4s-ember-client" -> "Http4s :: Ember :: Client",
-      "http4s-server"       -> "Http4s :: Server",
-      "http4s-client"       -> "Http4s :: Client"
-    ) map { Artifact("org.http4s", _, v, _) }
+      "http4s-server"       -> "Http4s :: Server"
+    ).map(Artifact("org.http4s", _, v, _)) ++ Seq(
+      // org.http4s package is exported from both core and client
+      Artifact("org.http4s", "http4s-client", v, "Http4s :: Client")
+        .withRequiredBundle(
+          s"org.http4s.http4s-core;bundle-version=$v"
+        )
+    )
 
   /** Twitter's hpack is used by http4s */
   def hpack(v: String) = Artifact(
@@ -244,7 +249,7 @@ object features:
   def catsEffect =
     feature("cats-effect", "3.4.10", "Cats Effect", b.catsEffect, cats)
 
-  def fs2 =
+  def fs2      =
     feature(
       "fs2",
       "3.6.1",
@@ -257,7 +262,7 @@ object features:
         ),
       catsEffect
     )
-  def log4cats = 
+  def log4cats =
     feature(
       "log4cats",
       "2.6.0",
@@ -290,7 +295,7 @@ object features:
         ),
       fs2,
       log4cats,
-      catsParse,
+      catsParse
     )
   def repo   = KarafFeatureRepository(
     "scala-libs",
