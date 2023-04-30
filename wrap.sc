@@ -12,9 +12,14 @@ case class Artifact(
     name: String,
     version: String,
     readableName: String,
-    scalaVersion: Option[String] = Option("3")
+    scalaVersion: Option[String] = Option("3"),
+    requiredBundle: Option[String] = None,
+    explicitPackageExport: Option[String] = None
 ):
-  def withoutScalaVersion = copy(scalaVersion = None)
+  def withoutScalaVersion                  = copy(scalaVersion = None)
+  def withRequiredBundle(k: String)        = copy(requiredBundle = Some(k))
+  def withExplicitPackageExport(k: String) =
+    copy(explicitPackageExport = Some(k))
 
   def versionSuffix = scalaVersion.fold("")(v => s"_$v")
   def baseURL       = s"wrap:mvn:$organization/$name$versionSuffix/$version"
@@ -23,15 +28,21 @@ case class Artifact(
     import java.net.URLEncoder as enc
     s"Bundle-Name=${enc.encode(readableName, "UTF-8")}"
 
-  def bundleSymbolicName = s"Bundle-SymbolicName=$organization.$name"
-  def packageExport      = s"Export-Package=*;version=$version"
-  def packageImport      = "Import-Package=*"
+  def requiredBundleArg = requiredBundle.fold("")(k => s"Require-Bundle=$k")
+
+  def bundleSymbolicName    = s"$organization.$name"
+  def bundleSymbolicNameArg = s"Bundle-SymbolicName=$bundleSymbolicName"
+  def packageExport         =
+    val exportString = explicitPackageExport.getOrElse(s"*;version=$version")
+    s"Export-Package=$exportString"
+  def packageImport         = "Import-Package=*"
 
   def wrapUrl: String =
     baseURL + "$" + Seq(
       bundleVersion,
       bundleName,
-      bundleSymbolicName,
+      bundleSymbolicNameArg,
+      requiredBundleArg,
       packageExport
       // packageImport
     ).mkString("&")
@@ -51,7 +62,7 @@ case class KarafFeature(
     attr("version")     := version,
     attr("description") := description,
     tag("feature")(attr("prerequisite") := true, "wrap"),
-    features.map(_.xmlTags),
+    features.map(f => tag("feature")(f.name)),
     bundles.map { b =>
       tag("bundle")(b.wrapUrl)
     }
@@ -70,6 +81,69 @@ case class KarafFeatureRepository(
   )
 
 object bundles:
+  val scalaExportedPackages = """scala
+    scala.annotation
+    scala.annotation.internal
+    scala.annotation.meta
+    scala.annotation.unchecked
+    scala.beans
+    scala.collection
+    scala.collection.concurrent
+    scala.collection.convert
+    scala.collection.convert.impl
+    scala.collection.generic
+    scala.collection.immutable
+    scala.collection.mutable
+    scala.compat
+    scala.compiletime
+    scala.compiletime.ops
+    scala.compiletime.testing
+    scala.concurrent
+    scala.concurrent.duration
+    scala.concurrent.impl
+    scala.deriving
+    scala.io
+    scala.jdk
+    scala.jdk.javaapi
+    scala.math
+    scala.quoted
+    scala.quoted.runtime
+    scala.ref
+    scala.reflect
+    scala.reflect.macros.internal
+    scala.runtime
+    scala.runtime.coverage
+    scala.runtime.function
+    scala.runtime.java8
+    scala.runtime.stdLibPatches
+    scala.sys
+    scala.sys.process
+    scala.util
+    scala.util.control
+    scala.util.hashing
+    scala.util.matching""".linesIterator
+    .map(_.trim)
+    .filter(_.nonEmpty)
+    .mkString(";")
+
+  def scala213Lib = Artifact(
+    "org.scala-lang",
+    "scala-library",
+    "2.13.10",
+    "Scala :: Library"
+  ).withoutScalaVersion
+
+  def scala322Lib = Artifact(
+    "org.scala-lang",
+    "scala3-library",
+    "3.2.2",
+    "Scala3 :: Library"
+  )
+    .withRequiredBundle(
+      scala213Lib.bundleSymbolicName + ";bundle-version=\"[2.13.10,3)\""
+    )
+    .withExplicitPackageExport(s"$scalaExportedPackages;version=3.2.2")
+
   /** typelevel is pervasive in the ecosystem, so we have a helper for it
     */
   def typelevel(version: String)(name: String, readableName: String) =
@@ -157,17 +231,77 @@ object features:
   ) =
     KarafFeature(name, version, description, bundles(version), deps)
 
-    
-  def cats       = 
-    feature("cats", "2.9.0", "Cats", b.cats)
+  def stdLib = feature(
+    "scala-std-lib",
+    "3.2.2",
+    "Scala3 :: Standard Library",
+    v => Seq(b.scala213Lib, b.scala322Lib)
+  )
+
+  def cats =
+    feature("cats", "2.9.0", "Cats", b.cats, stdLib)
 
   def catsEffect =
     feature("cats-effect", "3.4.10", "Cats Effect", b.catsEffect, cats)
 
   def fs2 =
-    feature("fs2", "3.6.1", "FS2", v => b.fs2(v) ++ Seq(b.scodec("1.1.37")), catsEffect)
+    feature(
+      "fs2",
+      "3.6.1",
+      "FS2",
+      v =>
+        b.fs2(v) ++ Seq(
+          b.scodec("1.1.37"),
+          b.ip4s("3.3.0"),
+          b.literally("1.1.0")
+        ),
+      catsEffect
+    )
+  def log4cats = 
+    feature(
+      "log4cats",
+      "2.6.0",
+      "Log4Cats",
+      b.log4cats,
+      catsEffect
+    )
 
-  def repo = KarafFeatureRepository("scala-libs", cats, catsEffect, fs2)
+  def catsParse =
+    feature(
+      "cats-parse",
+      "0.3.9",
+      "Cats :: Parse",
+      b.catsParse andThen (Seq(_)),
+      cats
+    )
+
+  def http4s =
+    feature(
+      "http4s",
+      "0.23.18",
+      "Http4s",
+      v =>
+        b.http4s(v) ++ Seq(
+          b.hpack("1.0.2"),
+          b.http4sCrypto("0.2.4"),
+          b.vault("3.5.0"),
+          b.caseInsensitive("1.3.0"),
+          b.keypool("0.4.8")
+        ),
+      fs2,
+      log4cats,
+      catsParse,
+    )
+  def repo   = KarafFeatureRepository(
+    "scala-libs",
+    stdLib,
+    cats,
+    catsEffect,
+    fs2,
+    http4s,
+    catsParse,
+    log4cats
+  )
 
 end features
 
@@ -192,6 +326,7 @@ val libs: Seq[Artifact] =
     )
   ).flatten
 
-def karafInstallCommands = libs.map(_.wrapUrl).map(u => s"install '$u'").mkString(";\n")
+def karafInstallCommands =
+  libs.map(_.wrapUrl).map(u => s"install '$u'").mkString(";\n")
 
 println(features.repo.xmlTags.render)
