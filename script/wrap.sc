@@ -173,9 +173,7 @@ object bundles:
     ).map(Artifact("org.http4s", _, v, _)) ++ Seq(
       // org.http4s package is exported from both core and client
       Artifact("org.http4s", "http4s-client", v, "Http4s :: Client")
-        .withRequiredBundle(
-          s"org.http4s.http4s-core;bundle-version=$v"
-        )
+        .withExplicitPackageExport(s"!org.http4s;*;version=$v")
     )
 
   /** Twitter's hpack is used by http4s */
