@@ -126,6 +126,21 @@ object bundles:
     .filter(_.nonEmpty)
     .mkString(";")
 
+  def scribe(v: String) =
+    Seq(
+      "scribe"       -> "Scribe",
+      "scribe-slf4j" -> "Scribe :: SLF4J",
+      "scribe-cats"  -> "Scribe :: Cats"
+    ).map(
+      Artifact( "com.outr", _, v, _))
+
+  def sourceCode(v: String) = Artifact(
+    "com.lihaoyi",
+    "sourcecode",
+    v,
+    "SourceCode"
+  )
+
   def scala213Lib = Artifact(
     "org.scala-lang",
     "scala-library",
@@ -247,6 +262,9 @@ object features:
   def catsEffect =
     feature("cats-effect", "3.4.10", "Cats Effect", b.catsEffect, cats)
 
+  def scribe = 
+    feature("scribe", "3.11.1", "Scribe", b.scribe)
+
   def fs2      =
     feature(
       "fs2",
@@ -303,7 +321,8 @@ object features:
     fs2,
     http4s,
     catsParse,
-    log4cats
+    log4cats,
+    scribe
   )
 
 end features
