@@ -126,7 +126,7 @@ object bundles:
     .filter(_.nonEmpty)
     .mkString(";")
 
-  def scribe(v: String) =
+  def scribe(v: String) = //TODO: imports/exports not correct
     Seq(
       "scribe"       -> "Scribe",
       "scribe-slf4j" -> "Scribe :: SLF4J",
@@ -322,7 +322,7 @@ object features:
     http4s,
     catsParse,
     log4cats,
-    scribe
+    // scribe
   )
 
 end features
