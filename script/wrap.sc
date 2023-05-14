@@ -260,7 +260,7 @@ object features:
     feature("cats", "2.9.0", "Cats", b.cats, deps = stdLib)
 
   def catsEffect =
-    feature("cats-effect", "3.4.10", "Cats Effect", b.catsEffect, cats)
+    feature("cats-effect", "3.5.0", "Cats Effect", b.catsEffect, cats)
 
   def scribe = 
     feature("scribe", "3.11.1", "Scribe", b.scribe)
@@ -268,7 +268,7 @@ object features:
   def fs2      =
     feature(
       "fs2",
-      "3.6.1",
+      "3.7.0",
       "FS2",
       v =>
         b.fs2(v) ++ Seq(
@@ -299,7 +299,7 @@ object features:
   def http4s =
     feature(
       "http4s",
-      "0.23.18",
+      "0.23.19",
       "Http4s",
       v =>
         b.http4s(v) ++ Seq(
@@ -328,27 +328,5 @@ object features:
 end features
 
 import bundles.*
-val libs: Seq[Artifact] =
-  Seq(
-    fs2("3.7.0"),
-    cats("2.9.0"),
-    catsEffect("3.5.0"),
-    http4s("0.23.19"),
-    log4cats("2.6.0"),
-    Seq(
-      ip4s("3.3.0"),
-      scodec("1.1.37"),
-      hpack("1.0.2"),
-      http4sCrypto("0.2.4"),
-      vault("3.5.0"),
-      catsParse("0.3.9"),
-      keypool("0.4.8"),
-      literally("1.1.0"),
-      caseInsensitive("1.3.0")
-    )
-  ).flatten
-
-def karafInstallCommands =
-  libs.map(_.wrapUrl).map(u => s"install '$u'").mkString(";\n")
 
 println(features.repo.xmlTags.render)
