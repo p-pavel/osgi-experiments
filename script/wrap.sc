@@ -330,10 +330,10 @@ end features
 import bundles.*
 val libs: Seq[Artifact] =
   Seq(
-    fs2("3.6.1"),
+    fs2("3.7.0"),
     cats("2.9.0"),
-    catsEffect("3.4.10"),
-    http4s("0.23.18"),
+    catsEffect("3.5.0"),
+    http4s("0.23.19"),
     log4cats("2.6.0"),
     Seq(
       ip4s("3.3.0"),
