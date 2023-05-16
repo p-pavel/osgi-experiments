@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+
+<BorderPane prefHeight="362.0" prefWidth="520.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.perikov.spike.javafx1.Controller">
+   <left>
+      <GridPane hgap="10.0" maxHeight="-Infinity" minWidth="250.0" vgap="10.0" BorderPane.alignment="TOP_LEFT">
+        <columnConstraints>
+          <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" />
+          <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" maxWidth="-Infinity" minWidth="10.0" prefWidth="200.0" />
+            <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="50.0" prefWidth="50.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <Label focusTraversable="false" text="Controls" GridPane.columnSpan="2147483647" GridPane.halignment="CENTER" GridPane.vgrow="NEVER" />
+            <Label focusTraversable="false" text="Phase" GridPane.rowIndex="1" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
+            <Label focusTraversable="false" layoutX="74.0" layoutY="46.0" text="Frequency" GridPane.rowIndex="2" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
+            <Slider fx:id="phase" blockIncrement="0.1" majorTickUnit="1.0" max="5.0" minorTickCount="5" prefWidth="150.0" showTickLabels="true" showTickMarks="true" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.valignment="BASELINE" GridPane.vgrow="ALWAYS" />
+            <Slider fx:id="frequency" blockIncrement="1.0" layoutX="115.0" layoutY="45.0" majorTickUnit="1.0" max="10.0" min="0.5" minorTickCount="4" prefWidth="150.0" showTickLabels="true" showTickMarks="true" value="1.0" GridPane.columnIndex="1" GridPane.rowIndex="2" GridPane.valignment="BASELINE" GridPane.vgrow="ALWAYS" />
+            <Label fx:id="phaseLabel" focusTraversable="false" text="Label" GridPane.columnIndex="2" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
+            <Label fx:id="frequencyLabel" focusTraversable="false" layoutX="230.0" layoutY="56.0" text="Label" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+            <ToggleButton fx:id="toggleFreeze" mnemonicParsing="false" text="Freeze" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+            <Separator focusTraversable="false" prefWidth="200.0" GridPane.columnSpan="2147483647" GridPane.rowIndex="3" />
+            <Separator focusTraversable="false" layoutX="10.0" layoutY="133.0" prefWidth="200.0" GridPane.columnSpan="2147483647" GridPane.rowIndex="5" />
+            <ChoiceBox fx:id="themeChoice" maxWidth="1.7976931348623157E308" prefWidth="150.0" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.halignment="LEFT" GridPane.hgrow="ALWAYS" GridPane.rowIndex="6" />
+            <Label text="Theme" GridPane.rowIndex="6" />
+         </children>
+      </GridPane>
+   </left>
+   <center>
+      <LineChart fx:id="lineChart" alternativeColumnFillVisible="true" createSymbols="false" legendSide="RIGHT" legendVisible="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" title="Function" verticalZeroLineVisible="false" BorderPane.alignment="CENTER">
+        <xAxis>
+          <NumberAxis autoRanging="false" forceZeroInRange="false" label="t" minorTickCount="10" side="BOTTOM" tickUnit="1.0" upperBound="6.3" />
+        </xAxis>
+        <yAxis>
+          <NumberAxis autoRanging="false" forceZeroInRange="false" label="y" lowerBound="-1.2" minorTickCount="10" side="LEFT" tickUnit="0.2" upperBound="1.2" />
+        </yAxis>
+      </LineChart>
+   </center>
+   <padding>
+      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+   </padding>
+</BorderPane>
