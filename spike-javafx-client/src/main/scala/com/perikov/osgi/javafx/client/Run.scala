@@ -1,4 +1,4 @@
-package com.perikov.osgi.javafx.client
+package com.perikov.osgi.javafxSpikeClient
 
 import org.osgi.service.component.annotations.*
 import org.osgi.service.component.ComponentContext
@@ -19,8 +19,10 @@ import scala.jdk.CollectionConverters.*
 import scala.util.chaining.*
 import javafx.scene.layout.VBox
 import javafx.scene.layout.BorderPane
+import scala.annotation.ClassfileAnnotation
+import scala.annotation.StaticAnnotation
 
-@Component(service = Array(classOf[TabProvider]))
+@Component(service = Array(classOf[TabProvider]) )
 class JavaFXClient @Activate (
   @Reference val tabHost: TabHost,
   ctx: ComponentContext,
@@ -28,7 +30,7 @@ class JavaFXClient @Activate (
 ) extends TabProvider:
 
   lazy val tab = 
-    val items = FXCollections.observableList((1 to 10000).map(s"=== Some item " + _).toList.asJava)
+    val items = FXCollections.observableList((1 to 10000).map(s"=== Some item ===" + _).toList.asJava)
     val list = new ListView(items)
     Tab("Client", list)
     .tap(_.setClosable(false))
@@ -38,14 +40,3 @@ class JavaFXClient @Activate (
 
 
 end JavaFXClient
-
-@Component
-class ServiceRegistrator @Activate(
-  ctx: BundleContext
-) extends TabProvider:
-  ctx.registerService(classOf[TabProvider], this, Hashtable())
-  lazy val tab: Tab = 
-    val vbox = VBox(Label("ServiceRegistrator"), Button("Click me"), Button("Another button"))
-    val pane = BorderPane(vbox)
-    vbox.setSpacing(5)
-    Tab("ServiceRegistrator",pane )
