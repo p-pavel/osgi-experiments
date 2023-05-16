@@ -1,7 +1,15 @@
-package com.perikov.osgi.http4s
+package com.perikov.osgi
 
-import cats.effect.{GenTemporal, Resource}
-import org.http4s.HttpRoutes
+/** Some wrappers to make http4s work with OSGi
+  */
+package http4s:
+  import cats.effect.{GenTemporal, Resource}
+  import org.http4s.HttpRoutes
+  import org.osgi.annotation.versioning.*
 
-trait RouteHandler:
-  def handler[F[_]](using F: GenTemporal[F, Throwable]): Resource[F, HttpRoutes[F]]
+  @ConsumerType
+  trait RouteHandler:
+    def handler[F[_]](using
+        F: GenTemporal[F, Throwable]
+    ): Resource[F, HttpRoutes[F]]
+end http4s
