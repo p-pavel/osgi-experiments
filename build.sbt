@@ -113,6 +113,7 @@ lazy val javafxApp = myProj("javafx-app1", "javafx-app1")
       "org.openjfx" % "javafx-fxml" % "20.0.1",
       "org.openjfx" % "javafx-controls" % "20.0.1",
       "io.github.mkpaz" % "atlantafx-base" % "1.2.0",
+      "org.osgi" % "org.osgi.service.wireadmin" % "1.0.2",
 
       "org.typelevel" %% "cats-effect" % "3.5.0",
       "co.fs2" %% "fs2-core" % "3.7.0",
