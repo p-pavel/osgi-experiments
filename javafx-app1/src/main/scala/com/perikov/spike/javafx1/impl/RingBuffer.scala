@@ -6,7 +6,7 @@ import java.util.AbstractList
  * 
  * **ABSOULUTELY THREAD UNSAFE**
  */
-class RingBuffer[@specialized(Double, Float, Int, Long) T:ClassTag](capacity: Int) extends AbstractList[T]:
+class RingBuffer[@specialized(Double, Float, Int, Long) T:ClassTag](val capacity: Int) extends AbstractList[T]:
   require(capacity > 0, "Capacity must be positive")
   private object indexes:
     private var _start = 0
