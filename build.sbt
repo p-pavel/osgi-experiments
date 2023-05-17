@@ -108,13 +108,16 @@ lazy val cleanSpike = myProj("cleanSpike", "spike-clean")
 lazy val javafxApp = myProj("javafx-app1", "javafx-app1")
   .settings(
     fork := true,
-    javaOptions ++=Seq("-XX:MaxGCPauseMillis=2", "-XX:+UseZGC"),
+    javaOptions ++=Seq("-XX:MaxGCPauseMillis=2", "-XX:+UseZGC", "-Xmx128m"),
     libraryDependencies ++= Seq(
       "org.openjfx" % "javafx-fxml" % "20.0.1",
       "org.openjfx" % "javafx-controls" % "20.0.1",
       "io.github.mkpaz" % "atlantafx-base" % "1.2.0",
 
-      "org.typelevel" %% "cats-effect" % "3.5.0"
+      "org.typelevel" %% "cats-effect" % "3.5.0",
+      "co.fs2" %% "fs2-core" % "3.7.0",
+
+      "org.scalameta" %% "munit" % "0.7.29" % Test,
 
     )
   )
