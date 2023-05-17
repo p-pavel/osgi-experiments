@@ -1,0 +1,14 @@
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" name="wireadmin">
+  <feature name="equinox-wireadmin" version="0.0.1" description="Nessesary bundles for WireAdmin">
+    <!-- <feature prerequisite="true">wrap</feature> -->
+    <bundle>
+      mvn:org.eclipse.platform/org.eclipse.equinox.wireadmin/1.0.800
+    </bundle>
+    <bundle>
+      mvn:org.eclipse.platform/org.eclipse.equinox.util/1.1.300
+    </bundle>
+    <bundle>
+      mvn:org.osgi/org.osgi.service.wireadmin/1.0.2
+    </bundle>
+  </feature>
+</features>
