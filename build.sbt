@@ -15,6 +15,17 @@ inThisBuild {
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
 lazy val framework   = osgi4Cats("framework")
+  .settings(
+    OsgiKeys.exportPackage   := Seq(
+      "com.perikov.osgi4cats.framework;com.perikov.osgi4cats;version=\"1.10.0-SNAPSHOT\""
+    ),
+    OsgiKeys.bundleActivator := Option(
+      "com.perikov.osgi4cats.framework.SpikeActivator"
+    ),
+    OsgiKeys.privatePackage  := Seq(
+      "com.perikov.osgi4cats.framework.impl"
+    ),
+  )
 lazy val service_log = osgi4Cats("service.log")
 
 lazy val root =
@@ -37,16 +48,17 @@ def bundleProject(name: String, base: String) =
       OsgiKeys.bundleSymbolicName := s"osgi4cats.$name",
       OsgiKeys.importPackage      := Seq(
         "scala;scala.**;version=\"[3.2,4.0)\"",
-        "cats.effect;version=\"[3.5,4.0)\"",
+        "cats;version=\"[2.9,3.0)\"",
+        "cats.effect;cats.effect.kernel;cats.effect.unsafe;version=\"[3.5,4.0)\"",
         "*"
       ),
       libraryDependencies ++= Seq(
-        "org.typelevel" %% "cats-effect" % "3.5.0",
-
-        "org.osgi" % "org.osgi.framework"                     % "1.10.0",
-        "org.osgi" % "org.osgi.service.component"             % "1.4.0",
-        "org.osgi" % "org.osgi.service.component.annotations" % "1.4.0",
-        "org.osgi" % "org.osgi.core"                          % "6.0.0",
-        "org.osgi" % "org.osgi.service.log"                   % "1.4.0"
+        "org.typelevel" %% "cats-effect"                            % "3.5.0",
+        "org.typelevel" %% "cats-core"                              % "2.9.0",
+        "org.osgi"       % "org.osgi.framework"                     % "1.10.0",
+        "org.osgi"       % "org.osgi.service.component"             % "1.4.0",
+        "org.osgi"       % "org.osgi.service.component.annotations" % "1.4.0",
+        "org.osgi"       % "org.osgi.core"                          % "6.0.0",
+        "org.osgi"       % "org.osgi.service.log"                   % "1.4.0"
       )
     )
